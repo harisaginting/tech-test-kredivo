@@ -1,6 +1,7 @@
 package api
 
 import (
+	"github.com/harisaginting/tech-test-kredivo/pkg/middleware"	
 	"github.com/harisaginting/tech-test-kredivo/pkg/wire"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -11,6 +12,7 @@ func RestV1(r *gin.RouterGroup, db *gorm.DB) {
 	apiAuth := wire.ApiAuth(db)
 	apiUser := wire.ApiUser(db)
 
+	member := middleware.Start(1)
 	// group rest
 	rest := r.Group("rest")
 	{
@@ -21,9 +23,9 @@ func RestV1(r *gin.RouterGroup, db *gorm.DB) {
 			apiAuthGroup := v1.Group("auth")
 			{
 				apiAuthGroup.POST("/register", apiAuth.Register)
-				apiAuthGroup.POST("/login", apiAuth.List)
+				apiAuthGroup.POST("/login", apiAuth.Login)
+				apiAuthGroup.GET("/me", member.MustMember(), apiAuth.Me)
 			}
-
 			// user
 			apiUserGroup := v1.Group("user")
 			{

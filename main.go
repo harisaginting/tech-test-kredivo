@@ -16,6 +16,7 @@ import (
 	"github.com/harisaginting/tech-test-kredivo/pkg/utils/helper"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	"github.com/harisaginting/tech-test-kredivo/pkg/cache"
 	"go.opentelemetry.io/contrib/instrumentation/github.com/gin-gonic/gin/otelgin"
 )
 
@@ -27,6 +28,9 @@ func main() {
 	// DB CONNECTION
 	db := database.Connection()
 	database.Migration(db)
+
+	// REDIS
+	cache.NewRedisClient()
 
 	port 	:= os.Getenv("PORT")
 	app 	:= gin.New()

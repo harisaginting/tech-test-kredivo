@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+
+  #psql
+  pgsql:
+    container_name: kredivo-pgsql
+    image: postgres:14.1-alpine
+    restart: always
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=kredivo
+    ports:
+      - '5433:5433'
+    expose:
+      - '5433:5433'
+    volumes:
+      - dpgsql:/var/lib/postgresql/data
+    networks:
+      -  kredivonet
+
+  #redis
+  nredis:
+    container_name: kredivo-redis
+    image: redis:6.2-alpine
+    restart: always
+    ports:
+      - '6379:6379'
+    command: redis-server --save 20 1 --loglevel warning --requirepass eYVX7EwVmmxKPCDmwMtyKVge8oLd2t81
+    volumes: 
+      - nredis:/data
+  
+networks:
+  kredivonet:
+    name: kredivonet
+    driver: bridge
+
+
+volumes:
+  nredis:
+    driver: local
+  dpgsql:
+    driver: local

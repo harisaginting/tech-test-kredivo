@@ -14,7 +14,6 @@ import (
 
 var (
 	ctx = context.Background()
-	cfg = config.GetInstance()
 	rdb *redis.Client
 	disabled bool
 )
@@ -23,30 +22,32 @@ func init(){
 	cfgredis 	 := helper.ForceInt(helper.MustGetEnv("REDIS"))
 	if cfgredis == 0 {
 		disabled = false
+	}else{
+		NewRedisClient()
 	}
 }
 
 func CreateCacheKey(value string) (cacheKey string) {
 	if disabled == true { return }
-	prefix := cfg.App.AppName + "_" + cfg.App.RunMode + "_"
+	prefix := helper.GetEnvOrDefault("APP_NAME", "DEVELOPMENT") + ":" + helper.GetEnvOrDefault("MODE", "LOCAL") + ":"
 	re := regexp.MustCompile("=|&")
 	cacheKey = prefix + re.ReplaceAllString(value, "_")
 	return cacheKey
 }
 
 // NewRedisClient
-func NewRedisClient() {
+func NewRedisClient() (err error) {
 	if disabled == true { return }
-	redisHost := helper.GetConfigOrDefault("redis.host", "")
-	redisPort := helper.GetConfigOrDefault("redis.port", "6379")
+	redisHost := helper.MustGetEnv("REDIS_HOST")
+	redisPort := helper.GetEnvOrDefault("REDIS_PORT", "6379")
 	if redisHost == "" || redisPort == ""{
 		log.Fatal(ctx, nil, "Redis Configuration Error")
 	}
 
 
 	redisAddr 		:= redisHost+":"+redisPort
-	redisPassword   := helper.GetConfigOrDefault("redis.password","")
-	dbNumber, err 	:= strconv.Atoi(helper.GetConfigOrDefault("redis.db", "0"))
+	redisPassword   := helper.GetEnvOrDefault("REDIS_PASSWORD","eYVX7EwVmmxKPCDmwMtyKVge8oLd2t81")
+	dbNumber, err 	:= strconv.Atoi(helper.GetEnvOrDefault("REDIS_DB", "0"))
 	if err != nil {
 		log.Warn(ctx, fmt.Sprintf("Failed to convert string to int : %s ", err))
 	}
@@ -65,6 +66,7 @@ func NewRedisClient() {
 	} else {
 		log.Fatal(ctx, err, "Redis Error Connection:")
 	}
+	return
 }
 
 // SetKey set key value redis
